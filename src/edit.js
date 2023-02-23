@@ -3,83 +3,75 @@ import {
 	useBlockProps,
 	RichText,
 	BlockControls,
-	InspectorControls,
 	AlignmentToolbar,
+	InspectorControls,
 } from '@wordpress/block-editor';
-import {
-	PanelBody,
-	TextControl,
-	TextareaControl,
-	ToggleControl,
-	AnglePickerControl,
-	ColorPicker,
-	ColorPalette,
-} from '@wordpress/components';
+import { PanelBody, RangeControl } from '@wordpress/components';
+import classnames from 'classnames';
 import './editor.scss';
 
-export default function Edit({ attributes, setAttributes }) {
-	const { text, alignment } = attributes;
-	const onChangeAlignment = (newAlignment) => {
-		setAttributes({ alignment: newAlignment });
+export default function Edit( props ) {
+	const { attributes, setAttributes } = props;
+	const { text, alignment, shadow, shadowOpacity } = attributes;
+	const onChangeAlignment = ( newAlignment ) => {
+		setAttributes( { alignment: newAlignment } );
 	};
-	const onChangeText = (newText) => {
-		setAttributes({ text: newText });
+	const onChangeText = ( newText ) => {
+		setAttributes( { text: newText } );
 	};
+	const onChangeShadowOpacity = ( newShadowOpacity ) => {
+		setAttributes( { shadowOpacity: newShadowOpacity } );
+	};
+	const toggleShadow = () => {
+		setAttributes( { shadow: ! shadow } );
+	};
+
+	const classes = classnames( `text-box-align-${ alignment }`, {
+		'has-shadow': shadow,
+		[ `shadow-opacity-${ shadowOpacity }` ]: shadow && shadowOpacity,
+	} );
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody
-					title={__('Color Settings', 'text-box')}
-					icon="admin-appearance"
-					initialOpen
-				>
-					<TextControl
-						label="Input Label"
-						value={text}
-						onChange={onChangeText}
-						help="help text"
-					/>
-					<TextareaControl
-						label="Text Area Label"
-						value={text}
-						onChange={onChangeText}
-						help="help text"
-					/>
-					<ToggleControl
-						label="Toggle Label"
-						checked={true}
-						// onChange={(v) => console.log(v)}
-					/>
-					<AnglePickerControl />
-					<ColorPicker
-						color={'F03'}
-						// onChangeComplete={(v) => console.log(v)}
-					/>
-					<ColorPalette
-						colors={[
-							{ name: 'red', color: '#F00' },
-							{ name: 'black', color: '#000' },
-						]}
-						// onChange={(v) => console.log(v)}
-					/>
-				</PanelBody>
+				{ shadow && (
+					<PanelBody title={ __( 'Shadow Setting', 'text-box' ) }>
+						<RangeControl
+							label={ __( 'Shadow Opacity', 'text-box' ) }
+							value={ shadowOpacity }
+							min={ 10 }
+							max={ 40 }
+							step={ 10 }
+							onChange={ onChangeShadowOpacity }
+						/>
+					</PanelBody>
+				) }
 			</InspectorControls>
-			<BlockControls>
+			<BlockControls
+				controls={ [
+					{
+						icon: 'admin-page',
+						title: __( 'Shadow', 'text-box' ),
+						onClick: toggleShadow,
+						isActive: shadow,
+					},
+				] }
+			>
 				<AlignmentToolbar
-					value={alignment}
-					onChange={onChangeAlignment}
+					value={ alignment }
+					onChange={ onChangeAlignment }
 				/>
 			</BlockControls>
 
 			<RichText
-				{...useBlockProps({
-					className: `text-box-align-${alignment}`,
-				})}
-				onChange={onChangeText}
-				value={text}
-				placeholder={__('Your Text', 'text-box')}
+				{ ...useBlockProps( {
+					className: classes,
+				} ) }
+				className="text-box-title"
+				onChange={ onChangeText }
+				value={ text }
+				placeholder={ __( 'Your Text', 'text-box' ) }
 				tagName="h4"
-				allowedFormats={[]}
+				allowedFormats={ [] }
 			/>
 		</>
 	);
